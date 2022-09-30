@@ -40,6 +40,6 @@ int findroot(T1*T,int number){
     if(i>=T[0].n)return -1;
     for(;T[i].parent>=0;i=T[i].parent);
     return i;
-
 }
+
 
