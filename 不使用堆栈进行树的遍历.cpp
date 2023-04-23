@@ -45,6 +45,7 @@ void push(List*plist,Tree**head){
 		plist->head=p;
 	}
 }
+
 Tree *pop(List*plist){
 	Node*p=plist->head;
 	plist->head=plist->head->next;

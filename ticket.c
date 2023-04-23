@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 
     for(i=1 ; i<=2; i++)
         pthread_join(tid[i], NULL); 
-     pthread_exit(0);
+      pthread_exit(0);
 }
 void *counter(void *no) 
 {
