@@ -19,7 +19,7 @@ int graph[1000][1000];
 int price[1000][1000];
 //名字和站点映射关系
 map<string,int>m;
-//两个站的运行时间段
+//两个站的运行时间段                
 //从一个点到另一个点的开始时间和结束时间
 map<int,map<int,string>>startTime;
 map<int,map<int,string>>endTime;
@@ -542,7 +542,7 @@ void prime(){
 int dp[1000][1000];
 //tsp问题
 void tsp(){
-   //表示经过集合j的点最终回到i，j是二进制表示集合
+   //dp表示从i出发，经过其余顶点j,，最终回到原点的距离
    int m = pow(2,cnt) - 1;
    for(int i = 1 ; i< 1000 ; i ++){
        for(int j = 1 ; j < 1000 ; j ++){

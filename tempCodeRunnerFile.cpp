@@ -1,52 +1,58 @@
-#include <iostream>
-#include<algorithm>
 #include<cstring>
-using namespace std;
-#include<vector>
+#include<iostream>
+#include<algorithm>
 #include<cmath>
- 
-void solve(){
-  int n;
-  cin>>n;
-  vector<int>v1(n + 2,0);
-  vector<int>v2(n + 2,0);
-  for(int i = 1 ;i <= n ; i ++)cin>>v1[i];
-  for(int i = 1;  i <= n ; i ++)cin>>v2[i];
-  int mx=  0;
-  int sum = 0;
-  int l = 1;
-  int r = 1;
-  int left = 1;
-  for(int i =1 ; i <= n ; i ++){
-     if(v1[i] != v2[i]){
-        sum ++;
-        if(sum >= mx){
-           l = left;
-           r = i;
-           mx = sum;
+using namespace std;
+int dp[1000][1000];
+int graph[1000][1000];
+int mx = 100000000;
+int cnt;
+//tsp问题
+int n;
+void tsp(){
+   //表示经过集合j的点最终回到i，j是二进制表示集合
+   int m = pow(2,cnt) - 1;
+   for(int i = 1 ; i< 1000 ; i ++){
+       for(int j = 1 ; j < 1000 ; j ++){
+           dp[i][j] = mx;
        }
-    }else {
-          left = i + 1;
-          sum = 0;
-      }
-  }
-  int w = l;
-  for(int i = w  - 1 ;i >= 1 ; i --){
-    if(v2[i] <= v2[i + 1])l --;
-    else break;
-  }
-  w = r;
-  for(int i = w + 1; i <= n ; i ++){
-    if(v2[i] >= v2[i - 1])r ++;
-    else break;
-  }
-  cout<<l<<" "<<r<<endl;
+   }
+   for(int i = 1 ; i <= n ; i++){
+       //不经过任何集合到i
+       dp[i][0] = graph[i][1];
+   }
+   for(int j = 1 ; j < m ; j ++){
+       for(int i = 1 ; i  <= n ; i ++){
+           dp[i][j] = mx;
+           //集合不能包括i自己
+           if((j >> (i - 1)) & 1 == 1)continue;
+           for(int k = 1 ; k <= n ; k ++){
+               //从集合里面选出一个数
+               if((j >> (k - 1)) & 1 == 0)continue;
+               //更新
+               dp[i][j] = min(dp[i][j],graph[i][k] + dp[k][j^(1 << (k - 1))]);
+               if(i == 2 && j == 4){
+                   cout<<k<<" "<<graph[i][k]<<" "<<dp[k][j ^ (1 << (k - 1))]<<endl;;
+               }
+           }
+       }
+   }
+   cout<<dp[1][m - 1]<<endl;
 }
- 
+void insert(int a,int b,int c){
+    graph[a][b] = graph[b][a] = c;
+}
 int main(){
-  int t = 1;
-  cin>>t;
-  while(t --){
-    solve();
-  }
+    for(int i = 0 ;i < 1000 ; i ++){
+        for(int j = 0 ; j< 1000 ; j ++){
+            graph[i][j] = mx;
+        }
+    }
+  cnt = 3;
+  n = 3;
+  insert(1,2,1);
+  insert(2,3,1);
+  insert(3,1,3);
+  tsp();
+  cout<<dp[2][4]<<endl;
 }
