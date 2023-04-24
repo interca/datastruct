@@ -539,36 +539,78 @@ void prime(){
     printf("最小生成树的值是:%d\n",sum);
 }
 
+int path[1000][1000];
 int dp[1000][1000];
+void tspPrint(int i,int j){
+   if(path[i][j] < 0)return;
+   tspPrint(i - (1 <<(j - 1)),path[i][j]);
+   cout<<j<<"->";
+}
 //tsp问题
 void tsp(){
-   //dp表示从i出发，经过其余顶点j,，最终回到原点的距离
-   int m = pow(2,cnt) - 1;
+  //floyd算法的结果
+  vector<vector<int>>f(1000,vector<int>(1000,mx));
+  //打印路径
+  vector<vector<int>>fpath(1000,vector<int>(1000,mx));
+  for(int i = 1 ; i <= n ; i ++){
+      for(int j = 1 ; j <= n ; j ++){
+          f[i][j] = graph[i][j];
+          fpath[i][j] = -1;
+      }
+  }
+  for(int k = 1 ; k <= n ; k ++){
+      for(int i = 1 ; i <= n ; i ++){
+          for(int j = 1 ; j <= n ; j ++){
+              if(f[i][j] > f[i][k] + f[k][j]){
+                  f[i][j] = f[i][k] + f[k][j];
+                  fpath[i][j] = k;
+              }
+          }
+      }
+  }
+   //dp表示从目的地走到j出发，经过i,走过的路程
+   int m = pow(2,cnt);
    for(int i = 1 ; i< 1000 ; i ++){
        for(int j = 1 ; j < 1000 ; j ++){
+           path[i][j] = -1;
            dp[i][j] = mx;
+           fpath[i][j] = -1;
        }
    }
-   for(int i = 1 ; i <= n ; i++){
-       //不经过任何集合到i
-       dp[i][0] = graph[i][1];
-   }
-   for(int j = 1 ; j < m ; j ++){
-       for(int i = 1 ; i  <= n ; i ++){
-           if(isDelete[i] == 1)continue;
-           dp[i][j] = mx;
-           //集合不能包括i自己
-           if((j >> (i - 1)) & 1 == 1)continue;
+   //从一号点走到一号点
+   dp[1][1] = 0;
+   for(int i = 0 ; i < m ; i ++){
+       for(int j = 1 ; j  <= n ; j ++){
+           //集合包括目的顶点
+           if(i >> (j - 1) & 1 == 0)continue;
            for(int k = 1 ; k <= n ; k ++){
-               if(isDelete[k] == 1)continue;
                //从集合里面选出一个数
-               if((j >> (k - 1)) & 1 == 0)continue;
-               //更新
-               dp[i][j] = min(dp[i][j],graph[i][k] + dp[k][j^(1 << (k - 1))]);
+               if((i - (1 <<(j - 1)))>>(k - 1)& 1){
+                  //更新
+                  if(graph[j][k] + dp[i-(1 <<(j - 1))][k] < dp[i][j]){
+                      dp[i][j] = min(dp[i][j],graph[j][k] + dp[i-(1 <<(j - 1))][k]);
+                      path[i][j] = k;
+                  }
+
+               }
            }
        }
    }
-   cout<<dp[1][m - 1]<<endl;
+   //现在知道1到各个点的哈密顿回路，然后加上各个点到1的距离
+   int ans = mx;
+   int idex;
+   for(int i = 2 ; i<= n ; i ++){
+       if(dp[m - 1][i] + graph[i][1] < ans){
+          idex = i;
+      }
+      ans = min(ans,dp[m - 1][i] + graph[i][1]);
+   }
+   cout<<"TSP路径和是:";
+   cout<<ans<<endl;
+   cout<<"TSP路径是:";
+    cout<<1<<"->";
+   tspPrint(m - 1,idex);
+   cout<<1<<endl;
 }
 
 //用户模式

@@ -10,34 +10,35 @@ int cnt;
 //tsp问题
 int n;
 void tsp(){
-   //表示经过集合j的点最终回到i，j是二进制表示集合
-   int m = pow(2,cnt) - 1;
+  
+ //dp表示从目的地走到j出发，经过i,走过的路程
+   int m = pow(2,cnt);
    for(int i = 1 ; i< 1000 ; i ++){
        for(int j = 1 ; j < 1000 ; j ++){
            dp[i][j] = mx;
        }
    }
-   for(int i = 1 ; i <= n ; i++){
-       //不经过任何集合到i
-       dp[i][0] = graph[i][1];
-   }
-   for(int j = 1 ; j < m ; j ++){
-       for(int i = 1 ; i  <= n ; i ++){
-           dp[i][j] = mx;
-           //集合不能包括i自己
-           if((j >> (i - 1)) & 1 == 1)continue;
+   //从一号点走到一号点
+   dp[1][1] = 0;
+   for(int i =  0; i < m ; i ++){
+       for(int j = 1 ; j  <= n ; j ++){
+           //集合包括目的顶点
+           if(i >> (j - 1) & 1 == 0)continue;
            for(int k = 1 ; k <= n ; k ++){
                //从集合里面选出一个数
-               if((j >> (k - 1)) & 1 == 0)continue;
-               //更新
-               dp[i][j] = min(dp[i][j],graph[i][k] + dp[k][j^(1 << (k - 1))]);
-               if(i == 2 && j == 4){
-                   cout<<k<<" "<<graph[i][k]<<" "<<dp[k][j ^ (1 << (k - 1))]<<endl;;
+               if((i - (1 <<(j - 1)))>>(k - 1)& 1){
+                  //更新
+                  dp[i][j] = min(dp[i][j],graph[j][k] + dp[i-(1 <<(j - 1))][k]);
                }
            }
        }
    }
-   cout<<dp[1][m - 1]<<endl;
+   //现在知道1到各个点的哈密顿回路，然后加上各个点到1的距离
+   int ans = mx;
+   for(int i = 2 ; i<= n ; i ++){
+      ans = min(ans,dp[m - 1][i] + graph[i][1]);
+   }
+   cout<<ans<<endl;
 }
 void insert(int a,int b,int c){
     graph[a][b] = graph[b][a] = c;
@@ -54,5 +55,4 @@ int main(){
   insert(2,3,1);
   insert(3,1,3);
   tsp();
-  cout<<dp[2][4]<<endl;
 }
