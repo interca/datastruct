@@ -8,33 +8,36 @@ int dp[1000][1000];
 int graph[1000][1000];
 int mx = 100000000;
 int cnt;
-//tspé—®é¢˜
+//tspÎÊÌâ
 int n;
-//æ‰“å°floyedè·¯çº¿
+//´òÓ¡floyedÂ·Ïß
 void printfpath(vector<vector<int>>fpath,int a,int b){
     if(fpath[a][b] < 0)return;
     printfpath(fpath,a,fpath[a][b]);
-    cout<<(fpath[a][b])<<" ";
+    cout<<(fpath[a][b])<<"->";
     printfpath(fpath,fpath[a][b],b);
 }
 
 int path[1000][1000];
 
-void tspPrint(int i,int j){
+
+//µİ¹é´òÓ¡tspÂ·¾¶
+void tspPrint(int i,int j,vector<int>&v){
    if(path[i][j] < 0)return;
-   tspPrint(i - (1 <<(j - 1)),path[i][j]);
-   cout<<j<<"->";
+   tspPrint(i - (1 <<(j - 1)),path[i][j],v);
+   v.push_back(j);
 }
 void tsp(){
-   //floydç®—æ³•çš„ç»“æœ
+  //¼ÇÂ¼tspÂ·¾¶µÄÊı×é
+  vector<int>v;
+  //floydËã·¨µÄ½á¹û
   vector<vector<int>>f(1000,vector<int>(1000,mx));
-  //æ‰“å°è·¯å¾„
+  //´òÓ¡Â·¾¶
   vector<vector<int>>fpath(1000,vector<int>(1000,mx));
   for(int i = 1 ; i <= n ; i ++){
       for(int j = 1 ; j <= n ; j ++){
           f[i][j] = graph[i][j];
           fpath[i][j] = -1;
-          path[i][j] = -1;
       }
   }
   for(int k = 1 ; k <= n ; k ++){
@@ -47,46 +50,61 @@ void tsp(){
           }
       }
   }
- //dpè¡¨ç¤ºä»ç›®çš„åœ°èµ°åˆ°jå‡ºå‘ï¼Œç»è¿‡i,èµ°è¿‡çš„è·¯ç¨‹
-   int m = pow(2,cnt);//1<<n
+   //dp±íÊ¾´ÓÄ¿µÄµØ×ßµ½j³ö·¢£¬¾­¹ıi,×ß¹ıµÄÂ·³Ì
+   int m = pow(2,cnt);
    for(int i = 1 ; i< 1000 ; i ++){
        for(int j = 1 ; j < 1000 ; j ++){
+           path[i][j] = -1;
            dp[i][j] = mx;
        }
    }
-   //ä»ä¸€å·ç‚¹èµ°åˆ°ä¸€å·ç‚¹
+   //´ÓÒ»ºÅµã×ßµ½Ò»ºÅµã
    dp[1][1] = 0;
-   for(int i =  0; i < m ; i ++){
+   for(int i = 0 ; i < m ; i ++){
        for(int j = 1 ; j  <= n ; j ++){
-           //é›†åˆåŒ…æ‹¬ç›®çš„é¡¶ç‚¹
+           //¼¯ºÏ°üÀ¨Ä¿µÄ¶¥µã
            if(i >> (j - 1) & 1 == 0)continue;
            for(int k = 1 ; k <= n ; k ++){
-               //ä»é›†åˆé‡Œé¢é€‰å‡ºä¸€ä¸ªæ•°
+               //´Ó¼¯ºÏÀïÃæÑ¡³öÒ»¸öÊı
                if((i - (1 <<(j - 1)))>>(k - 1)& 1){
-                  //æ›´æ–°
-                  if(f[j][k] + dp[i-(1 <<(j - 1))][k] < dp[i][j]){
-                       dp[i][j] = min(dp[i][j],graph[j][k] + dp[i-(1 <<(j - 1))][k]);
-                       path[i][j] = k;
+                  //¸üĞÂ
+                  if(graph[j][k] + dp[i-(1 <<(j - 1))][k] < dp[i][j]){
+                      dp[i][j] = min(dp[i][j],f[j][k] + dp[i-(1 <<(j - 1))][k]);
+                      path[i][j] = k;
                   }
+
                }
            }
        }
    }
-//ç°åœ¨çŸ¥é“1åˆ°å„ä¸ªç‚¹çš„å“ˆå¯†é¡¿å›è·¯ï¼Œç„¶ååŠ ä¸Šå„ä¸ªç‚¹åˆ°1çš„è·ç¦»
+   //ÏÖÔÚÖªµÀ1µ½¸÷¸öµãµÄ¹şÃÜ¶Ù»ØÂ·£¬È»ºó¼ÓÉÏ¸÷¸öµãµ½1µÄ¾àÀë
    int ans = mx;
-   int t = -1;
+   int idex;
    for(int i = 2 ; i<= n ; i ++){
-       if(dp[m - 1][i] + graph[i][1] < ans){
-           t = i;
-       }
-      ans = min(ans,dp[m - 1][i] + graph[i][1]);
+       if(dp[m - 1][i] + f[i][1] < ans){
+          idex = i;
+      }
+      ans = min(ans,dp[m - 1][i] + f[i][1]);
    }
-   cout<<"è·¯å¾„å’Œæ˜¯:";
+   cout<<"TSPÂ·¾¶ºÍÊÇ:";
    cout<<ans<<endl;
-   cout<<"è·¯å¾„æ˜¯:"
-   cout<<1<<"->";
-   tspPrint(m - 1,t);
-   cout<<1<<endl;
+   v.push_back(1);
+   tspPrint(m - 1,idex,v);
+   v.push_back(1);
+   cout<<"TSPÂ·¾¶ÊÇ:";
+   for(int i =0 ; i < v.size()  - 1; i ++){
+      int a = v[i];
+      int b = v[i + 1];
+      cout<<a<<"->";
+      //Ö¤Ã÷a b Á½µãÊÇÍ¨¹ıfloydÊµÏÖµÄ
+      if(graph[a][b] > f[a][b]){
+         //cout<<a<<"ssss"<<b<<endl;
+         printfpath(fpath,a,b);
+      }
+      if(i == v.size() - 2){
+          cout<<b<<endl;
+      }
+   }
 }
 void insert(int a,int b,int c){
     graph[a][b] = graph[b][a] = c;

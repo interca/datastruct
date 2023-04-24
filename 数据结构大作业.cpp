@@ -347,7 +347,7 @@ void dijkstra(){
 void printfpath(vector<vector<int>>fpath,int a,int b){
     if(fpath[a][b] < 0)return;
     printfpath(fpath,a,fpath[a][b]);
-    cout<<(fpath[a][b])<<" ";
+    cout<<(fpath[a][b])<<"->";
     printfpath(fpath,fpath[a][b],b);
 }
 
@@ -389,7 +389,7 @@ void floyd(){
   }
   cout<<a<<"到"<<b<<"的最短路长度为"<<f[a][b]<<endl;
   cout<<"路径:"<<endl;
-  cout<<a<<" ";
+  cout<<a<<"->";
   printfpath(fpath,a,b);
   cout<<b<<endl<<endl;
   
@@ -501,7 +501,7 @@ void floyd2(){
   }
   cout<<a<<"到"<<b<<"的最少花费为"<<f[a][b]<<endl;
   cout<<"路径:"<<endl;
-  cout<<a<<" ";
+  cout<<a<<"->";
   printfpath(fpath,a,b);
   cout<<b<<endl<<endl;
 }
@@ -539,15 +539,22 @@ void prime(){
     printf("最小生成树的值是:%d\n",sum);
 }
 
+//存储tsp路径
 int path[1000][1000];
+//求tsp
 int dp[1000][1000];
-void tspPrint(int i,int j){
+
+//递归打印tsp路径
+void tspPrint(int i,int j,vector<int>&v){
    if(path[i][j] < 0)return;
-   tspPrint(i - (1 <<(j - 1)),path[i][j]);
-   cout<<j<<"->";
+   tspPrint(i - (1 <<(j - 1)),path[i][j],v);
+   v.push_back(j);
 }
+
 //tsp问题
 void tsp(){
+  //记录tsp路径的数组
+  vector<int>v;
   //floyd算法的结果
   vector<vector<int>>f(1000,vector<int>(1000,mx));
   //打印路径
@@ -588,7 +595,7 @@ void tsp(){
                if((i - (1 <<(j - 1)))>>(k - 1)& 1){
                   //更新
                   if(graph[j][k] + dp[i-(1 <<(j - 1))][k] < dp[i][j]){
-                      dp[i][j] = min(dp[i][j],graph[j][k] + dp[i-(1 <<(j - 1))][k]);
+                      dp[i][j] = min(dp[i][j],f[j][k] + dp[i-(1 <<(j - 1))][k]);
                       path[i][j] = k;
                   }
 
@@ -600,17 +607,30 @@ void tsp(){
    int ans = mx;
    int idex;
    for(int i = 2 ; i<= n ; i ++){
-       if(dp[m - 1][i] + graph[i][1] < ans){
+       if(dp[m - 1][i] + f[i][1] < ans){
           idex = i;
       }
-      ans = min(ans,dp[m - 1][i] + graph[i][1]);
+      ans = min(ans,dp[m - 1][i] + f[i][1]);
    }
    cout<<"TSP路径和是:";
    cout<<ans<<endl;
    cout<<"TSP路径是:";
-    cout<<1<<"->";
-   tspPrint(m - 1,idex);
-   cout<<1<<endl;
+   v.push_back(1);
+   tspPrint(m - 1,idex,v);
+   v.push_back(1);
+   cout<<"TSP路径是:";
+   for(int i =0 ; i < v.size()  - 1; i ++){
+      int a = v[i];
+      int b = v[i + 1];
+      cout<<a<<"->";
+      //证明a b 两点是通过floyd实现的
+      if(graph[a][b] > f[a][b]){
+         printfpath(fpath,a,b);
+      }
+      if(i == v.size() - 2){
+          cout<<b<<endl;
+      }
+   }
 }
 
 //用户模式
