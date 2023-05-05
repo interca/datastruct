@@ -4,6 +4,8 @@
 #include<vector>
 #include<cmath>
 #include<map>
+#include<fstream>
+#include<sstream>
 using namespace std;
 //站点最大编号
 int n;
@@ -37,7 +39,35 @@ void insert(int a,int b,int c,int p,string start,string end){
     endTime[a][b] = end;
     endTime[b][a] = end;
 }
+int stringToInt(string str) {
+    int result = 0;
+    bool isNegative = false;
+    int i = 0;
 
+    // 处理符号
+    if (str[0] == '-') {
+        isNegative = true;
+        i = 1;
+    }
+
+    // 逐个字符转换
+    for (; i < str.length(); i++) {
+        // 必须是数字字符
+        if (str[i] < '0' || str[i] > '9') {
+            // 非法字符，返回0或者抛出异常
+            return 0;
+        }
+        // 字符转数字
+        result = result * 10 + (str[i] - '0');
+    }
+
+    // 处理符号
+    if (isNegative) {
+        result = -result;
+    }
+
+    return result;
+}
 //初始化
 void init(){
     cnt = 7;
@@ -52,8 +82,45 @@ void init(){
             }
         }
     }
+    ifstream infile("graph.txt");
+    string line;
+    vector<vector<string>> data;
+
+    while (getline(infile, line)) {
+        istringstream iss(line);
+        vector<string> row;
+        string val;
+        while (iss >> val) {
+            row.push_back(val);
+        }
+        data.push_back(row);
+    }
+   
+    for (auto row : data) {
+     
+        int a=stoi(row[0]);
+        int b=stoi(row[1]);
+        int c=stoi(row[2]);
+        int d=stoi(row[3]);
+        insert(a,b,c,d,row[4],row[5]);
+    }
+}
+//初始化
+/**void init(){
+    cnt = 7;
+    n = 7;
+    for(int i = 1 ;i <= n ; i ++){
+        for(int j = 1 ; j <= n ; j ++){
+            graph[i][j] = mx;
+            price[i][j] = mx;
+            if(i == j){
+                graph[i][j] = 0;
+                price[i][j] = 0;
+            }
+        }
+    }
     //方便数据的测试，手动插入数据
-    insert(1,2,2,2,"00:00:00","23:59:59");
+    /**insert(1,2,2,2,"00:00:00","23:59:59");
     insert(1,4,1,1,"00:00:00","23:59:59");
     insert(1,3,4,4,"00:00:00","23:59:59");
     insert(2,5,10,10,"00:00:00","23:59:59");
@@ -65,48 +132,52 @@ void init(){
     insert(4,7,4,4,"00:00:00","23:59:59");
     insert(5,7,6,6,"00:00:00","23:59:59");
     insert(6,7,1,1,"00:00:00","23:59:59");  
-}
+    **/
+
 
 //添加站点
 void addStation(){
-  string s;
-  cout<<"      输入要添加的站点名称: ";
-  cin>>s;
-  if(m.count(s) && isDelete[m[s]] == 0){
-      cout<<"      该站点已经存在"<<endl;
-  }else {
      n ++;
      cnt ++;
      for(int i = 1 ; i <= n ; i ++){
          graph[i][n] = mx;
          graph[n][i] = mx;
      }
-     m[s] = n;
      graph[n][n] = 0;
      cout<<"      添加成功"<<endl;
   }
-}
 
 //删除站点
 void deleteStation(){
-  string s;
-  cout<<"      输入要删除的站点名称: ";
+  int s;
+  cout<<"  输入要删除的站点: ";
   cin>>s;
-  if(m.count(s) == 0 || isDelete[m[s]] == 1){
-      cout<<"     该站点已经不存在"<<endl;
-  }else {
-      m[s] = 0;
-      isDelete[m[s]] = 1;
-      if(m[s] == n)n --;
-      cnt --;
-      cout<<"     删除成功"<<endl;
+  if(s <= 0 || s > n){
+    cout<<"站点不存在"<<endl;
+    return;
   }
+  int g[100][100];
+  for(int  i = 1 ; i <= n ; i ++){
+    for(int j = 1 ; j <= n ; j ++){
+      g[i][j] = graph[i][j];
+    }
+  }
+  for(int i = 1 ; i <= n ; i ++){
+    for(int j = 1 ; j <= n ; j ++){
+        int a = i;
+        int b = j;
+        if(a >= s)a ++;
+        if(b >= s)b ++;
+        graph[i][j] = graph[i][j] = g[a][b];
+    }
+  }
+  n --;
 }
 
 //更新距离
 void changeDist(){
-   cout<<"      输入站点的信息:起点名称,终点名称,要更新的距离:"<<endl;
-   string start,end;
+   cout<<"      输入站点的信息:起点,终点,要更新的距离:"<<endl;
+   int start,end;
    int distant;
    cout<<"      起点:";
    cin>>start;
@@ -118,22 +189,21 @@ void changeDist(){
    cin>>distant;
    //cout<<start<<"  "<<end<<endl;
    //cout<<m[start]<<" "<<m[end]<<endl;
-   if(m[start] == 0 || m[end] == 0){
+   if(start <= 0 || end > n){
        cout<<"      起点或者终点不存在"<<endl;
    }else {
-       int x = m[start];
-       int y = m[end];
+       int x = start;
+       int y = end;
        graph[x][y] = graph[y][x] = distant;
-       cout<<"      更新成功"<<endl;
-       //cout<<start<<"  "<<end<<endl;
-       //cout<<m[start]<<" "<<m[end]<<endl;
+       cout<<"   更新成功"<<endl;
    }
+   cout<<graph[1][2]<<endl;
 }
 
 //更新票价
 void changePrice(){
-   cout<<"      输入站点的信息:起点名称,终点名称,要更新票价:"<<endl;
-   string start,end;
+   cout<<"      输入站点的信息:起点,终点,要更新票价:"<<endl;
+   int start,end;
    int p;
    cout<<"      起点:";
    cin>>start;
@@ -143,11 +213,11 @@ void changePrice(){
    cout<<endl;
    cout<<"      票价:";
    cin>>p;
-   if(m[start] == 0 || m[end] == 0){
-       cout<<"      起点或者终点不存在"<<endl;
+   if(start <= 0 || start > n){
+       cout<<"    起点或者终点不存在"<<endl;
    }else {
-       int x = m[start];
-       int y = m[end];
+       int x = start;
+       int y = end;
        price[x][y] = price[y][x] = p;
        cout<<"      更新成功"<<endl;
    }
@@ -155,8 +225,8 @@ void changePrice(){
 
 //更新运营时间
 void changeStartTime(){
-   cout<<"      输入站点的信息:起点名称,终点名称,起始时间:"<<endl;
-   string start,end,time;
+   cout<<"      输入站点的信息:起点,终点,起始时间:"<<endl;
+   int start,end,time;
    cout<<"      起点:";
    cin>>start;
    cout<<endl;
@@ -165,11 +235,11 @@ void changeStartTime(){
    cout<<endl;
    cout<<"      时间:";
    cin>>time;
-   if(m[start] == 0 || m[end] == 0){
+   if(start < 0 || end > n){
        cout<<"      起点或者终点不存在"<<endl;
    }else {
-       int x = m[start];
-       int y = m[end];
+       int x = start;
+       int y = end;
        startTime[x][y] = time;
        startTime[y][x] = time;
        cout<<"      更新成功"<<endl;
@@ -179,8 +249,8 @@ void changeStartTime(){
 
 //更新结束时间
 void changeEndTime(){
-   cout<<"      输入站点的信息:起点名称,终点名称,结束时间:"<<endl;
-   string start,end,time;
+   cout<<"      输入站点的信息:起点,终点,结束时间:"<<endl;
+    int start,end,time;
    cout<<"      起点:";
    cin>>start;
    cout<<endl;
@@ -189,11 +259,11 @@ void changeEndTime(){
    cout<<endl;
    cout<<"      时间:";
    cin>>time;
-   if(m[start] == 0 || m[end] == 0){
+   if(start < 0 || end > n){
        cout<<"      起点或者终点不存在"<<endl;
    }else {
-       int x = m[start];
-       int y = m[end];
+       int x = start;
+       int y = end;
        startTime[x][y] = time;
        startTime[y][x] = time;
        cout<<"      更新成功"<<endl;
@@ -376,6 +446,7 @@ void floyd(){
           fpath[i][j] = -1;
       }
   }
+  cout<<f[a][b]<<endl;
   for(int k = 1 ; k <= n ; k ++){
       for(int i = 1 ; i <= n ; i ++){
           for(int j = 1 ; j <= n ; j ++){
@@ -516,14 +587,18 @@ void prime(){
     }
     dist[1] = 0;
     int sum = 0;
-    for(int i = 0 ; i< cnt; i ++){
-        cout<<i<<endl;
+    for(int i = 0 ; i< n; i ++){
+        //cout<<i<<endl;
         int t = -1;
         //找到距离生成树最近的点
         for(int j = 1 ; j <= n ; j ++){
            if(vist[j] == 0 &&(t == -1 || dist[t] > dist[j])){
                t = j;
            }
+        }
+        if(t == -1 || dist[t] == mx){
+          cout<<"不能构成最小生成树"<<endl;
+          return;
         }
         if(dist[t] == mx)break;
         //加入生成树
@@ -559,6 +634,7 @@ void tsp(){
   vector<vector<int>>f(1000,vector<int>(1000,mx));
   //打印路径
   vector<vector<int>>fpath(1000,vector<int>(1000,mx));
+  cout<<graph[1][2]<<" "<<graph[2][1]<<endl;
   for(int i = 1 ; i <= n ; i ++){
       for(int j = 1 ; j <= n ; j ++){
           f[i][j] = graph[i][j];
@@ -576,7 +652,7 @@ void tsp(){
       }
   }
    //dp表示从目的地走到j出发，经过i,走过的路程
-   int m = pow(2,cnt);
+   int m = pow(2,n);
    for(int i = 1 ; i< 1000 ; i ++){
        for(int j = 1 ; j < 1000 ; j ++){
            path[i][j] = -1;
@@ -595,6 +671,7 @@ void tsp(){
                if((i - (1 <<(j - 1)))>>(k - 1)& 1){
                   //更新
                   if(graph[j][k] + dp[i-(1 <<(j - 1))][k] < dp[i][j]){
+                    if(j == 1 && k == 2)cout<<"sss"<<endl;
                       dp[i][j] = min(dp[i][j],f[j][k] + dp[i-(1 <<(j - 1))][k]);
                       path[i][j] = k;
                   }
