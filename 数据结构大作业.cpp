@@ -12,15 +12,16 @@ int n;
 //站点数量
 int cnt;
 //是否被删除
-int isDelete[1000];
+int isDelete[2000];
 //表示正无穷
 int mx = 100000000;
 //距离
-int graph[1000][1000];
+int graph[2000][2000];
 //票价
-int price[1000][1000];
+int price[2000][2000];
 //名字和站点映射关系
 map<string,int>m;
+map<string,int>mp;
 //两个站的运行时间段                
 //从一个点到另一个点的开始时间和结束时间
 map<int,map<int,string>>startTime;
@@ -30,7 +31,18 @@ map<int,map<int,string>>endTime;
 string username = "hyj";
 string password = "123";
 
-//插入测试数据
+//打印图
+void printGraph(){
+  for(int i = 1 ; i <= n ; i ++){
+    for(int j = 1 ; j <= n ; j ++){
+       if(graph[i][j] == mx)cout<<-1<<" ";
+       else cout<<graph[i][j]<<" ";
+    }
+    cout<<endl;
+  }
+}
+
+//插入数据
 void insert(int a,int b,int c,int p,string start,string end){
     graph[a][b] = graph[b][a] = c;
     price[a][b] = price[b][a] = p;
@@ -39,39 +51,11 @@ void insert(int a,int b,int c,int p,string start,string end){
     endTime[a][b] = end;
     endTime[b][a] = end;
 }
-int stringToInt(string str) {
-    int result = 0;
-    bool isNegative = false;
-    int i = 0;
 
-    // 处理符号
-    if (str[0] == '-') {
-        isNegative = true;
-        i = 1;
-    }
-
-    // 逐个字符转换
-    for (; i < str.length(); i++) {
-        // 必须是数字字符
-        if (str[i] < '0' || str[i] > '9') {
-            // 非法字符，返回0或者抛出异常
-            return 0;
-        }
-        // 字符转数字
-        result = result * 10 + (str[i] - '0');
-    }
-
-    // 处理符号
-    if (isNegative) {
-        result = -result;
-    }
-
-    return result;
-}
 //初始化
 void init(){
-    cnt = 7;
-    n = 7;
+    cnt = 10;
+    n = 10;
     for(int i = 1 ;i <= n ; i ++){
         for(int j = 1 ; j <= n ; j ++){
             graph[i][j] = mx;
@@ -97,7 +81,6 @@ void init(){
     }
    
     for (auto row : data) {
-     
         int a=stoi(row[0]);
         int b=stoi(row[1]);
         int c=stoi(row[2]);
@@ -137,8 +120,14 @@ void init(){
 
 //添加站点
 void addStation(){
+     string s; 
+     cout<<"  输入站点名称:";
+     cin>>s;
+     cout<<endl;
+     if(m[s] != 0){
+       cout<<"改点已经存在"<<endl;
+     }
      n ++;
-     cnt ++;
      for(int i = 1 ; i <= n ; i ++){
          graph[i][n] = mx;
          graph[n][i] = mx;
@@ -176,9 +165,9 @@ void deleteStation(){
 
 //更新距离
 void changeDist(){
-   cout<<"      输入站点的信息:起点,终点,要更新的距离:"<<endl;
-   int start,end;
-   int distant;
+   cout<<"      输入站点的信息:起点和终点,要更新的距离:"<<endl;
+   string start,end;
+   int t;
    cout<<"      起点:";
    cin>>start;
    cout<<endl;
@@ -186,25 +175,23 @@ void changeDist(){
    cin>>end;
    cout<<endl;
    cout<<"      距离:";
-   cin>>distant;
-   //cout<<start<<"  "<<end<<endl;
-   //cout<<m[start]<<" "<<m[end]<<endl;
-   if(start <= 0 || end > n){
+   cin>>t;
+   int x = m[start];
+   int y = m[end];
+   if(x == 0 || y == 0){
        cout<<"      起点或者终点不存在"<<endl;
    }else {
-       int x = start;
-       int y = end;
-       graph[x][y] = graph[y][x] = distant;
-       cout<<"   更新成功"<<endl;
+       graph[x][y] = t;
+       graph[y][x] = t;
+       cout<<"      更新成功"<<endl;
    }
-   cout<<graph[1][2]<<endl;
 }
 
 //更新票价
 void changePrice(){
    cout<<"      输入站点的信息:起点,终点,要更新票价:"<<endl;
-   int start,end;
-   int p;
+  string start,end;
+   int t;
    cout<<"      起点:";
    cin>>start;
    cout<<endl;
@@ -212,13 +199,14 @@ void changePrice(){
    cin>>end;
    cout<<endl;
    cout<<"      票价:";
-   cin>>p;
-   if(start <= 0 || start > n){
-       cout<<"    起点或者终点不存在"<<endl;
+   cin>>t;
+   int x = m[start];
+   int y = m[end];
+   if(x == 0 || y == 0){
+       cout<<"      起点或者终点不存在"<<endl;
    }else {
-       int x = start;
-       int y = end;
-       price[x][y] = price[y][x] = p;
+       price[x][y] = t;
+       price[y][x] = t;
        cout<<"      更新成功"<<endl;
    }
 }
@@ -226,7 +214,8 @@ void changePrice(){
 //更新运营时间
 void changeStartTime(){
    cout<<"      输入站点的信息:起点,终点,起始时间:"<<endl;
-   int start,end,time;
+   string start,end;
+   int t;
    cout<<"      起点:";
    cin>>start;
    cout<<endl;
@@ -234,14 +223,14 @@ void changeStartTime(){
    cin>>end;
    cout<<endl;
    cout<<"      时间:";
-   cin>>time;
-   if(start < 0 || end > n){
+   cin>>t;
+   int x = m[start];
+   int y = m[end];
+   if(x == 0 || y == 0){
        cout<<"      起点或者终点不存在"<<endl;
    }else {
-       int x = start;
-       int y = end;
-       startTime[x][y] = time;
-       startTime[y][x] = time;
+       startTime[x][y] = t;
+       startTime[y][x] = t;
        cout<<"      更新成功"<<endl;
    }
 }
@@ -250,7 +239,7 @@ void changeStartTime(){
 //更新结束时间
 void changeEndTime(){
    cout<<"      输入站点的信息:起点,终点,结束时间:"<<endl;
-    int start,end,time;
+   int start,end,time;
    cout<<"      起点:";
    cin>>start;
    cout<<endl;
@@ -298,27 +287,27 @@ void admin(){
   cout<<"               登录成功!"<<endl<<endl;
   cout<<"                         ------------ 管理员后台系统 ----------- "<<endl<<endl;
   while(f){
-    cout<<"      1-增加站点    2-删除站点    3-修改线路距离   4-修改线路票价  5-修改线路起始时间  6-更新路线的结束时间  7-退出 "<<endl<<endl;
+    cout<<"      1-增加站点     2-修改线路距离   3-修改线路票价  4-修改线路起始时间  5-更新路线的结束时间  6-打印整个路线    7-退出 "<<endl<<endl;
     cin>>choice;
     switch (choice){
         case 1:
           addStation();
           break;
         case 2:
-          deleteStation();
-          break;
-        case 3:
           changeDist();
           break;
-        case 4:
+        case 3:
           changePrice();
           break;
-        case 5:
+        case 4:
           changeStartTime();
           break; 
-        case 6:
+        case 5:
           changeEndTime();
           break;
+        case 6:
+          printGraph();
+          break;  
         case 7:
           f = 0;
           break;  
@@ -329,18 +318,22 @@ void admin(){
   }
 }
 
-//打印每个点的临接点及其距离
+//当前站点的临接点及其距离
 void prinfAll(){
-  for(int i = 1 ; i <= n ; i ++){
-      if(isDelete[i] == 0){
-          cout<<"站点"<<i<<"的临接站点有:"<<endl;
-          for(int j =1 ; j <= n ; j ++){
-              if(isDelete[j] == 0 && graph[i][j] != mx && i != j){
-                  cout<<j<<",距离是"<<graph[i][j]<<endl;
-              }
-          }
-      }
+  cout<<"输入当前站点:";
+  cout<<endl;
+  int v;
+  cin>>v;
+  if(v < 1 || v > n){
+    cout<<"输入有误"<<endl;
+    return;
   }
+  cout<<"站点"<<v<<"的临接点有:"<<endl;
+  for(int i = 1 ; i <= n ; i ++){
+        if(graph[v][i] < mx && i != v)
+        cout<<i<<",距离是"<<graph[v][i]<<endl;
+  }
+  cout<<endl<<endl;
 }
 
 //距离最短路
@@ -446,7 +439,6 @@ void floyd(){
           fpath[i][j] = -1;
       }
   }
-  cout<<f[a][b]<<endl;
   for(int k = 1 ; k <= n ; k ++){
       for(int i = 1 ; i <= n ; i ++){
           for(int j = 1 ; j <= n ; j ++){
@@ -538,7 +530,7 @@ void dijkstra2(){
 
 //任意两个站点的价格
 void floyd2(){
-   int a,b;
+  int a,b;
   cout<<"输入两个点:";
   cin>>a>>b;
   if(a < 1 || b < 1 || a > n || b > n){
@@ -615,9 +607,9 @@ void prime(){
 }
 
 //存储tsp路径
-int path[1000][1000];
-//求tsp
-int dp[1000][1000];
+int path[2000][2000];
+//求tsp  //表示从起点出发，经过i状态的城市,到达j点的最短路
+int dp[2000][2000];
 
 //递归打印tsp路径
 void tspPrint(int i,int j,vector<int>&v){
@@ -628,13 +620,20 @@ void tspPrint(int i,int j,vector<int>&v){
 
 //tsp问题
 void tsp(){
+  int w;
+  cout<<"输入起始位置:";
+  cin>>w;
+  cout<<endl;
+  if(w < 1 || w > n){
+    cout<<"没有这个点"<<endl;
+    return;
+  }
   //记录tsp路径的数组
   vector<int>v;
   //floyd算法的结果
-  vector<vector<int>>f(1000,vector<int>(1000,mx));
+  vector<vector<int>>f(2000,vector<int>(2000,mx));
   //打印路径
-  vector<vector<int>>fpath(1000,vector<int>(1000,mx));
-  cout<<graph[1][2]<<" "<<graph[2][1]<<endl;
+  vector<vector<int>>fpath(2000,vector<int>(2000,mx));
   for(int i = 1 ; i <= n ; i ++){
       for(int j = 1 ; j <= n ; j ++){
           f[i][j] = graph[i][j];
@@ -653,15 +652,14 @@ void tsp(){
   }
    //dp表示从目的地走到j出发，经过i,走过的路程
    int m = pow(2,n);
-   for(int i = 1 ; i< 1000 ; i ++){
-       for(int j = 1 ; j < 1000 ; j ++){
+   for(int i = 1 ; i< 2000 ; i ++){
+       for(int j = 1 ; j < 2000 ; j ++){
            path[i][j] = -1;
            dp[i][j] = mx;
-           fpath[i][j] = -1;
        }
    }
    //从一号点走到一号点
-   dp[1][1] = 0;
+   dp[1 << (w - 1)][w] = 0;
    for(int i = 0 ; i < m ; i ++){
        for(int j = 1 ; j  <= n ; j ++){
            //集合包括目的顶点
@@ -671,7 +669,6 @@ void tsp(){
                if((i - (1 <<(j - 1)))>>(k - 1)& 1){
                   //更新
                   if(graph[j][k] + dp[i-(1 <<(j - 1))][k] < dp[i][j]){
-                    if(j == 1 && k == 2)cout<<"sss"<<endl;
                       dp[i][j] = min(dp[i][j],f[j][k] + dp[i-(1 <<(j - 1))][k]);
                       path[i][j] = k;
                   }
@@ -680,22 +677,24 @@ void tsp(){
            }
        }
    }
+  
    //现在知道1到各个点的哈密顿回路，然后加上各个点到1的距离
    int ans = mx;
    int idex;
    for(int i = 2 ; i<= n ; i ++){
-       if(dp[m - 1][i] + f[i][1] < ans){
+       if(dp[m - 1][i] + f[i][w] < ans){
           idex = i;
       }
-      ans = min(ans,dp[m - 1][i] + f[i][1]);
+      ans = min(ans,dp[m - 1][i] + f[i][w]);
    }
    cout<<"TSP路径和是:";
    cout<<ans<<endl;
    cout<<"TSP路径是:";
-   v.push_back(1);
+   v.push_back(w);
    tspPrint(m - 1,idex,v);
-   v.push_back(1);
+   v.push_back(w);
    cout<<"TSP路径是:";
+   cout<<endl;
    for(int i =0 ; i < v.size()  - 1; i ++){
       int a = v[i];
       int b = v[i + 1];
@@ -708,6 +707,7 @@ void tsp(){
           cout<<b<<endl;
       }
    }
+   cout<<endl<<endl;
 }
 
 //用户模式
@@ -716,7 +716,7 @@ void user(){
     int choice;
     int f = 1;
     while(f){
-        cout<<"  1-每个站点的相邻车座和距离  2-求到目的地最短路  3-求任意两个点的最短路  4-求到目的地最少花费  5-求任意两个地点的最短花费   6-最小生成树  7-tsp"<<endl;
+        cout<<"  1-当前站点相邻车座和距离  2-求到目的地最短路  3-求任意两个点的最短路  4-求到目的地最少花费  5-求任意两个地点的最短花费 6-最小生成树   7-tsp    8-打印整个路线   9-退出"<<endl;
         cin>>choice;
         switch(choice){
             case 1:
@@ -741,6 +741,9 @@ void user(){
               tsp();
               break;
             case 8: 
+              printGraph();
+              break;
+            case 9:
               f = 0;
               break;
             default:

@@ -7,35 +7,35 @@
 #include<fstream>
 #include<sstream>
 using namespace std;
-//ç«™ç‚¹æœ€å¤§ç¼–å·
+//Õ¾µã×î´ó±àºÅ
 int n;
-//ç«™ç‚¹æ•°é‡
+//Õ¾µãÊıÁ¿
 int cnt;
-//æ˜¯å¦è¢«åˆ é™¤
+//ÊÇ·ñ±»É¾³ı
 int isDelete[1000];
-//è¡¨ç¤ºæ­£æ— ç©·
+//±íÊ¾ÕıÎŞÇî
 int mx = 100000000;
-//è·ç¦»
+//¾àÀë
 int graph[1000][1000];
-//ç¥¨ä»·
+//Æ±¼Û
 int price[1000][1000];
-//åå­—å’Œç«™ç‚¹æ˜ å°„å…³ç³»
+//Ãû×ÖºÍÕ¾µãÓ³Éä¹ØÏµ
 map<string,int>m;
-//ä¸¤ä¸ªç«™çš„è¿è¡Œæ—¶é—´æ®µ                
-//ä»ä¸€ä¸ªç‚¹åˆ°å¦ä¸€ä¸ªç‚¹çš„å¼€å§‹æ—¶é—´å’Œç»“æŸæ—¶é—´
+//Á½¸öÕ¾µÄÔËĞĞÊ±¼ä¶Î                
+//´ÓÒ»¸öµãµ½ÁíÒ»¸öµãµÄ¿ªÊ¼Ê±¼äºÍ½áÊøÊ±¼ä
 map<int,map<int,string>>startTime;
 map<int,map<int,string>>endTime;
 
-//è´¦æˆ·å¯†ç 
+//ÕË»§ÃÜÂë
 string username = "hyj";
 string password = "123";
 
-//æ’å…¥æµ‹è¯•æ•°æ®
+//²åÈë²âÊÔÊı¾İ
 void insert(int a,int b,int c){
     graph[a][b] = graph[b][a] = c;
 }
 
-//åˆå§‹åŒ–
+//³õÊ¼»¯
 void init(){
     cnt = 8;
     n = 8;
@@ -49,7 +49,7 @@ void init(){
             }
         }
     }
-    //æ–¹ä¾¿æ•°æ®çš„æµ‹è¯•ï¼Œæ‰‹åŠ¨æ’å…¥æ•°æ®
+    //·½±ãÊı¾İµÄ²âÊÔ£¬ÊÖ¶¯²åÈëÊı¾İ
     insert(1,2,4);
     insert(1,4,3);
     insert(2,4,4);
@@ -63,7 +63,7 @@ void init(){
     insert(6,8,4);
     insert(7,8,6);
 }
-//æ‰“å°floyedè·¯çº¿
+//´òÓ¡floyedÂ·Ïß
 void printfpath(vector<vector<int>>fpath,int a,int b){
     if(fpath[a][b] < 0)return;
     printfpath(fpath,a,fpath[a][b]);
@@ -76,19 +76,19 @@ void printfpath(vector<vector<int>>fpath,int a,int b){
 //floyd
 void floyd(){
   int a,b;
-  cout<<"è¾“å…¥ä¸¤ä¸ªç‚¹:";
+  cout<<"ÊäÈëÁ½¸öµã:";
   cin>>a>>b;
   if(a < 1 || b < 1 || a > n || b > n){
-      cout<<"è¾“å…¥é”™è¯¯"<<endl;
+      cout<<"ÊäÈë´íÎó"<<endl;
       return;
   }
   if(a == b){
-      cout<<"æœ€çŸ­è·¯æ˜¯è‡ªå·±åˆ°è‡ªå·±"<<endl;
+      cout<<"×î¶ÌÂ·ÊÇ×Ô¼ºµ½×Ô¼º"<<endl;
       return;
   }
-  //floydç®—æ³•çš„ç»“æœ
+  //floydËã·¨µÄ½á¹û
   vector<vector<int>>f(1000,vector<int>(1000,mx));
-  //æ‰“å°è·¯å¾„
+  //´òÓ¡Â·¾¶
   vector<vector<int>>fpath(1000,vector<int>(1000,mx));
   for(int i = 1 ; i <= n ; i ++){
       for(int j = 1 ; j <= n ; j ++){
@@ -108,33 +108,33 @@ void floyd(){
           }
       }
   }
-  cout<<a<<"åˆ°"<<b<<"çš„æœ€çŸ­è·¯é•¿åº¦ä¸º"<<f[a][b]<<endl;
-  cout<<"è·¯å¾„:"<<endl;
+  cout<<a<<"µ½"<<b<<"µÄ×î¶ÌÂ·³¤¶ÈÎª"<<f[a][b]<<endl;
+  cout<<"Â·¾¶:"<<endl;
   cout<<a<<"->";
   printfpath(fpath,a,b);
   cout<<b<<endl<<endl;
   
 }
 
-//å­˜å‚¨tspè·¯å¾„
+//´æ´¢tspÂ·¾¶
 int path[1000][1000];
-//æ±‚tsp
+//Çótsp
 int dp[1000][1000];
 
-//é€’å½’æ‰“å°tspè·¯å¾„
+//µİ¹é´òÓ¡tspÂ·¾¶
 void tspPrint(int i,int j,vector<int>&v){
    if(path[i][j] < 0)return;
    tspPrint(i - (1 <<(j - 1)),path[i][j],v);
    v.push_back(j);
 }
 
-//tspé—®é¢˜
+//tspÎÊÌâ
 void tsp(){
-  //è®°å½•tspè·¯å¾„çš„æ•°ç»„
+  //¼ÇÂ¼tspÂ·¾¶µÄÊı×é
   vector<int>v;
-  //floydç®—æ³•çš„ç»“æœ
+  //floydËã·¨µÄ½á¹û
   vector<vector<int>>f(1000,vector<int>(1000,mx));
-  //æ‰“å°è·¯å¾„
+  //´òÓ¡Â·¾¶
   vector<vector<int>>fpath(1000,vector<int>(1000,mx));
   for(int i = 1 ; i <= n ; i ++){
       for(int j = 1 ; j <= n ; j ++){
@@ -152,7 +152,7 @@ void tsp(){
           }
       }
   }
-   //dpè¡¨ç¤ºä»ç›®çš„åœ°èµ°åˆ°jå‡ºå‘ï¼Œç»è¿‡i,èµ°è¿‡çš„è·¯ç¨‹
+   //dp±íÊ¾´ÓÄ¿µÄµØ×ßµ½j³ö·¢£¬¾­¹ıi,×ß¹ıµÄÂ·³Ì
    int m = pow(2,n);
    for(int i = 1 ; i< 1000 ; i ++){
        for(int j = 1 ; j < 1000 ; j ++){
@@ -161,18 +161,17 @@ void tsp(){
            fpath[i][j] = -1;
        }
    }
-   //ä»ä¸€å·ç‚¹èµ°åˆ°ä¸€å·ç‚¹
+   //´ÓÒ»ºÅµã×ßµ½Ò»ºÅµã
    dp[1][1] = 0;
    for(int i = 0 ; i < m ; i ++){
        for(int j = 1 ; j  <= n ; j ++){
-           //é›†åˆåŒ…æ‹¬ç›®çš„é¡¶ç‚¹
+           //¼¯ºÏ°üÀ¨Ä¿µÄ¶¥µã
            if(i >> (j - 1) & 1 == 0)continue;
            for(int k = 1 ; k <= n ; k ++){
-               //ä»é›†åˆé‡Œé¢é€‰å‡ºä¸€ä¸ªæ•°
+               //´Ó¼¯ºÏÀïÃæÑ¡³öÒ»¸öÊı
                if((i - (1 <<(j - 1)))>>(k - 1)& 1){
-                  //æ›´æ–°
+                  //¸üĞÂ
                   if(graph[j][k] + dp[i-(1 <<(j - 1))][k] < dp[i][j]){
-                    if(j == 1 && k == 2)cout<<"sss"<<endl;
                       dp[i][j] = min(dp[i][j],f[j][k] + dp[i-(1 <<(j - 1))][k]);
                       path[i][j] = k;
                   }
@@ -181,7 +180,7 @@ void tsp(){
            }
        }
    }
-   //ç°åœ¨çŸ¥é“1åˆ°å„ä¸ªç‚¹çš„å“ˆå¯†é¡¿å›è·¯ï¼Œç„¶ååŠ ä¸Šå„ä¸ªç‚¹åˆ°1çš„è·ç¦»
+   //ÏÖÔÚÖªµÀ1µ½¸÷¸öµãµÄ¹şÃÜ¶Ù»ØÂ·£¬È»ºó¼ÓÉÏ¸÷¸öµãµ½1µÄ¾àÀë
    int ans = mx;
    int idex;
    for(int i = 2 ; i<= n ; i ++){
@@ -190,18 +189,18 @@ void tsp(){
       }
       ans = min(ans,dp[m - 1][i] + f[i][1]);
    }
-   cout<<"TSPè·¯å¾„å’Œæ˜¯:";
+   cout<<"TSPÂ·¾¶ºÍÊÇ:";
    cout<<ans<<endl;
-   cout<<"TSPè·¯å¾„æ˜¯:";
+   cout<<"TSPÂ·¾¶ÊÇ:";
    v.push_back(1);
    tspPrint(m - 1,idex,v);
    v.push_back(1);
-   cout<<"TSPè·¯å¾„æ˜¯:";
+   cout<<"TSPÂ·¾¶ÊÇ:";
    for(int i =0 ; i < v.size()  - 1; i ++){
       int a = v[i];
       int b = v[i + 1];
-      cout<<a<<"->";
-      //è¯æ˜a b ä¸¤ç‚¹æ˜¯é€šè¿‡floydå®ç°çš„
+      cout<<a - 1<<"->";
+      //Ö¤Ã÷a b Á½µãÊÇÍ¨¹ıfloydÊµÏÖµÄ
       if(graph[a][b] > f[a][b]){
          printfpath(fpath,a,b);
       }

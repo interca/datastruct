@@ -5,19 +5,15 @@ using namespace std;
 #include<vector>
 #include<cmath>
 #include<map>
-
+#include<set>
 
 void solve(){
-  int n,m;
-  cin>>n>>m;
-  if(n % m == 1 )cout<<"YES"<<endl;
-  else cout<<"NO"<<endl;
+  
 }
- 
+
 int main(){
-  int t = 1;
+  int t;
   cin>>t;
-  while(t --){
-    solve();
-  }
+  while(t --)solve();  
 }
+
