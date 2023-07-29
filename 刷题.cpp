@@ -2,7 +2,6 @@
 #include <iostream>
 #include <algorithm>
 #include <climits>
-#include<set>
 #include<map>
 #include<cstring>
 using namespace std;
@@ -10,7 +9,7 @@ using namespace std;
 #include<set>
 #include<cmath>
 #include<queue>
- 
+
  
 void solve() {
   int n;
