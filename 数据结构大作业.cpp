@@ -6,6 +6,7 @@
 #include<map>
 #include<fstream>
 #include<sstream>
+#include <codecvt>
 using namespace std;
 //站点最大编号
 int n;
@@ -21,7 +22,7 @@ int graph[2000][2000];
 int price[2000][2000];
 //名字和站点映射关系
 map<string,int>m;
-map<string,int>mp;
+map<int,string>mp;
 //两个站的运行时间段                
 //从一个点到另一个点的开始时间和结束时间
 map<int,map<int,string>>startTime;
@@ -70,6 +71,7 @@ void init(){
     string line;
     vector<vector<string>> data;
 
+    //读入边
     while (getline(infile, line)) {
         istringstream iss(line);
         vector<string> row;
@@ -80,6 +82,27 @@ void init(){
         data.push_back(row);
     }
    
+    string line2;
+    vector<vector<string>> data2;
+    //读入图的映射关系
+    ifstream infile2("point.txt");
+    infile2.imbue(locale(locale(), new codecvt_utf8<wchar_t>));
+    while(getline(infile2,line2)){
+      istringstream iss(line2);
+      vector<string> row;
+      string val;
+      while (iss >> val) {
+        row.push_back(val);
+      }
+      data2.push_back(row);
+    }
+    for(auto k : data2){
+      int  a = stoi(k[0]);
+      string b = k[1];
+      m[b] = a;
+      mp[a] = b;
+    }
+
     for (auto row : data) {
         int a=stoi(row[0]);
         int b=stoi(row[1]);
@@ -321,31 +344,38 @@ void admin(){
 //当前站点的临接点及其距离
 void prinfAll(){
   cout<<"输入当前站点:";
+  string s;
+  cin>>s;
+  if(m[s] == 0){
+    cout<<"不存在这个站点"<<endl;
+    return;
+  }
   cout<<endl;
-  int v;
-  cin>>v;
+  int v = m[s];
   if(v < 1 || v > n){
     cout<<"输入有误"<<endl;
     return;
   }
-  cout<<"站点"<<v<<"的临接点有:"<<endl;
+  cout<<"站点"<<s<<"的临接点有:"<<endl;
   for(int i = 1 ; i <= n ; i ++){
         if(graph[v][i] < mx && i != v)
-        cout<<i<<",距离是"<<graph[v][i]<<endl;
+        cout<<mp[i]<<",距离是"<<graph[v][i]<<endl;
   }
   cout<<endl<<endl;
 }
 
 //距离最短路
 void dijkstra(){
-  cout<<" 请输入站点:";
-  int v;
-  cin>>v;
-  cout<<endl;
-  if(v > n || v <= 0){
-      cout<<"输入不合法"<<endl;
-      return;
+  cout<<"输入当前站点:";
+  string s;
+  cin>>s;
+  if(m[s] == 0){
+    cout<<"不存在这个站点"<<endl;
+    return;
   }
+  int v = m[s];
+  cout<<endl;
+ 
   //距离数组
   int dist[1000];
   //路径数组
@@ -380,15 +410,15 @@ void dijkstra(){
   for(int i = 1 ; i<= n ; i++){
     if(isDelete[i] == 1)continue;
     if(i == v){
-      cout<<"站点"<<v<<endl;
+      cout<<"站点"<<mp[v]<<endl;
       cout << "最短路径长度是0" <<endl;
     }
     else{
       if(dist[i] == mx){
-        cout << i<<"和目标点不连通" << endl;
+        cout << mp[i]<<"和目标点不连通" << endl;
         continue;
       }
-      cout<<"站点"<<i<<endl;
+      cout<<"站点"<<mp[i]<<endl;
       cout<<"最短路长度是:"<<dist[i]<<endl;
       vector<int>num;
       int index = i;
@@ -398,7 +428,8 @@ void dijkstra(){
         index = path[index];
       }
       for(int j = num.size() - 1 ; j >= 0 ; j --){
-        cout<<num[j]<<" ";
+        cout<<mp[num[j]]<<" ";
+         if(j != 0)cout<<"->";
       }
       cout<<endl<<endl;;
     }
@@ -410,7 +441,7 @@ void dijkstra(){
 void printfpath(vector<vector<int>>fpath,int a,int b){
     if(fpath[a][b] < 0)return;
     printfpath(fpath,a,fpath[a][b]);
-    cout<<(fpath[a][b])<<"->";
+    cout<<(mp[fpath[a][b]])<<"->";
     printfpath(fpath,fpath[a][b],b);
 }
 
@@ -418,10 +449,13 @@ void printfpath(vector<vector<int>>fpath,int a,int b){
 
 //floyd
 void floyd(){
+  string s1,s2;
   int a,b;
   cout<<"输入两个点:";
-  cin>>a>>b;
-  if(a < 1 || b < 1 || a > n || b > n){
+  cin>>s1>>s2;
+  a = m[s1];
+  b = m[s2];
+  if(a == 0 || b == 0){
       cout<<"输入错误"<<endl;
       return;
   }
@@ -450,25 +484,26 @@ void floyd(){
           }
       }
   }
-  cout<<a<<"到"<<b<<"的最短路长度为"<<f[a][b]<<endl;
+  cout<<s1<<"到"<<s2<<"的最短路长度为"<<f[a][b]<<endl;
   cout<<"路径:"<<endl;
-  cout<<a<<"->";
+  cout<<s1<<"->";
   printfpath(fpath,a,b);
-  cout<<b<<endl<<endl;
+  cout<<s2<<endl<<endl;
   
 }
 
 
 //最少价格
 void dijkstra2(){
-  cout<<" 请输入站点:";
-  int v;
-  cin>>v;
-  cout<<endl;
-  if(v > n || v <= 0){
-      cout<<"输入不合法"<<endl;
-      return;
+   cout<<"输入当前站点:";
+  string s;
+  cin>>s;
+  if(m[s] == 0){
+    cout<<"不存在这个站点"<<endl;
+    return;
   }
+  int v = m[s];
+  cout<<endl;
   //距离数组
   int dist[1000];
   //路径数组
@@ -503,15 +538,15 @@ void dijkstra2(){
   for(int i = 1 ; i<= n ; i++){
     if(isDelete[i] == 1)continue;
     if(i == v){
-      cout<<"站点"<<v<<endl;
+      cout<<"站点"<<mp[v]<<endl;
       cout << "最少花费是0" <<endl;
     }
     else{
       if(dist[i] == mx){
-        cout << i<<"和目标点不连通" << endl;
+        cout <<mp[i]<<"和目标点不连通" << endl;
         continue;
       }
-      cout<<"站点"<<i<<endl;
+      cout<<"站点"<<mp[i]<<endl;
       cout<<"最少花费是:"<<dist[i]<<endl;
       vector<int>num;
       int index = i;
@@ -521,7 +556,8 @@ void dijkstra2(){
         index = path[index];
       }
       for(int j = num.size() - 1 ; j >= 0 ; j --){
-        cout<<num[j]<<" ";
+        cout<<mp[num[j]];
+        if(j != 0)cout<<"->";
       }
       cout<<endl<<endl;
     }
@@ -530,15 +566,18 @@ void dijkstra2(){
 
 //任意两个站点的价格
 void floyd2(){
+  string s1,s2;
   int a,b;
   cout<<"输入两个点:";
-  cin>>a>>b;
-  if(a < 1 || b < 1 || a > n || b > n){
+  cin>>s1>>s2;
+  a = m[s1];
+  b = m[s2];
+  if(a == 0 || b == 0){
       cout<<"输入错误"<<endl;
       return;
   }
   if(a == b){
-      cout<<"最少花费是0"<<endl;
+      cout<<"最短路是自己到自己"<<endl;
       return;
   }
   //floyd算法的结果
@@ -562,11 +601,11 @@ void floyd2(){
           }
       }
   }
-  cout<<a<<"到"<<b<<"的最少花费为"<<f[a][b]<<endl;
+  cout<<s1<<"到"<<s2<<"的最少花费为"<<f[a][b]<<endl;
   cout<<"路径:"<<endl;
-  cout<<a<<"->";
+  cout<<s1<<"->";
   printfpath(fpath,a,b);
-  cout<<b<<endl<<endl;
+  cout<<s2<<endl<<endl;
 }
 
 //最小生成树
@@ -620,11 +659,13 @@ void tspPrint(int i,int j,vector<int>&v){
 
 //tsp问题
 void tsp(){
+  string s;
   int w;
   cout<<"输入起始位置:";
-  cin>>w;
+  cin>>s;
   cout<<endl;
-  if(w < 1 || w > n){
+  w = m[s];
+  if(w == 0){
     cout<<"没有这个点"<<endl;
     return;
   }
@@ -687,6 +728,9 @@ void tsp(){
       }
       ans = min(ans,dp[m - 1][i] + f[i][w]);
    }
+   m;
+   ;
+   dp[m-1][5];
    cout<<"TSP路径和是:";
    cout<<ans<<endl;
    cout<<"TSP路径是:";
@@ -698,16 +742,80 @@ void tsp(){
    for(int i =0 ; i < v.size()  - 1; i ++){
       int a = v[i];
       int b = v[i + 1];
-      cout<<a<<"->";
+      cout<<mp[a]<<"->";
       //证明a b 两点是通过floyd实现的
       if(graph[a][b] > f[a][b]){
          printfpath(fpath,a,b);
       }
       if(i == v.size() - 2){
-          cout<<b<<endl;
+          cout<<mp[b]<<endl;
       }
    }
    cout<<endl<<endl;
+}
+
+
+
+
+
+int mn = mx;
+void dfs(vector<int>num,vector<vector<int>>&v,int x,int t,int sum,vector<int>&vist){
+   if(x == t){
+     num.push_back(x);
+     num.push_back(sum);
+     v.push_back(num);
+     mn = min(mn,sum);
+     return;
+   }
+   num.push_back(x);
+   for(int i = 1 ; i <= n ; i ++){
+      if(vist[i] == 0 && graph[x][i] != mx){
+        vist[i] = 1;
+        dfs(num,v,i,t,sum + graph[x][i],vist);
+        vist[i] = 0;
+      }
+   }
+}
+
+//寻找两个点的最优路线和全部线路
+void findAllRotue(){
+   string s1,s2;
+   mn = mx;
+   vector<int>vist(1000,0);
+   int a,b;
+   cout<<"输入起点:";
+   cout<<endl;
+   cin>>s1;
+   cout<<"输入终点:";
+   cout<<endl;
+   cin>>s2;
+   vector<vector<int>>v;
+   vector<int>num;
+   a = m[s1];
+   b = m[s2];
+   int ide;
+   vist[a] = 1;
+   dfs(num,v,a,b,0,vist);
+
+   for(int k = 0 ; k < v.size() ; k ++){
+      auto w = v[k];
+      for(int i = 0 ;i < w.size() - 1 ; i ++){
+        cout<<mp[w[i]];
+        if(i != w.size() - 2)cout<<"-->";
+      }
+      cout<<endl;
+      if(w[w.size() - 1] == mn){
+        ide = k; 
+      }
+   }
+    cout<<endl;
+    cout<<"最短路是:"<<mn<<endl;
+    cout<<"最优路径是:"<<endl;
+    for(int i = 0 ; i < v[ide].size() - 1 ; i ++){
+        cout<<mp[v[ide][i]];
+         if(i != v[ide].size() - 2)cout<<"-->";
+    }
+    cout<<endl<<endl;;
 }
 
 //用户模式
@@ -716,7 +824,7 @@ void user(){
     int choice;
     int f = 1;
     while(f){
-        cout<<"  1-当前站点相邻车座和距离  2-求到目的地最短路  3-求任意两个点的最短路  4-求到目的地最少花费  5-求任意两个地点的最短花费 6-最小生成树   7-tsp    8-打印整个路线   9-退出"<<endl;
+        cout<<"  1-当前站点相邻车座和距离  2-求到目的地最短路  3-求任意两个点的最短路  4-求到目的地最少花费  5-求任意两个地点的最短花费 6-最小生成树   7-tsp    8-打印整个地铁  9-展示两个站点全部路线 10-退出"<<endl;
         cin>>choice;
         switch(choice){
             case 1:
@@ -744,6 +852,9 @@ void user(){
               printGraph();
               break;
             case 9:
+              findAllRotue();
+              break;  
+            case 10:
               f = 0;
               break;
             default:

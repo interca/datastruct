@@ -1,7 +1,12 @@
-#include<iostream>
-#include<cstring>
+#include <iostream>
 #include<algorithm>
+#include<cstring>
 #include<vector>
+#include<cmath>
+#include<map>
+#include<fstream>
+#include<sstream>
+#include <codecvt>
 using namespace std;
 typedef struct node{
   //是否是叶子节点
@@ -26,10 +31,10 @@ typedef struct node{
 Node * head;
 
 //获取当前目录下的所有商品(叶子节点)
-void getAllNode(Node * root,vector<string>&v){
+void getAllNode(Node * root,vector<Node*>&v){
    if(root == NULL)return;
     while(root){
-       if(root->child == NULL)v.push_back(root->name);
+       if(root->child == NULL)v.push_back(root);
        getAllNode(root->child,v);
        root = root ->brother; 
     }
@@ -112,9 +117,31 @@ void init(){
    Node n = {0,"苹果电脑",100,NULL,NULL,NULL,10000,0,"电脑"};
    Node o = {0,"华硕电脑",1,NULL,NULL,NULL,20000,0,"电脑"};
    vector<Node>v = {a,b,c,d,e,f,g,h,i,j,k,m,n,o};
-   for(int i = 0; i < v.size() ; i ++){
-     addNode(v[i]);
-   }
+   //for(int i = 0; i < v.size() ; i ++){
+     //addNode(v[i]);
+  // }
+   //读取商品信息
+    ifstream infile("good.txt");
+    string line;
+    vector<vector<string>> data;
+    //读入边
+    while (getline(infile, line)) {
+        istringstream iss(line);
+        vector<string> row;
+        string val;
+        while (iss >> val) {
+            row.push_back(val);
+        }
+        data.push_back(row);
+    }
+    for(auto k : data){
+        for(auto s : k){
+            cout<<s<<"   ";
+        }
+        cout<<endl;
+        Node w = {stoi(k[0]),k[1],stoi(k[2]),NULL,NULL,NULL,stoi(k[3]),stoi(k[4]),k[5]};
+        addNode(w);
+    }
 }
 
 //获取当前目录的信息
@@ -123,21 +150,25 @@ void view(Node*root){
   //获取当前商品类型的所有子分类
   vector<string>v1;
   //获取当前商品的所有叶子节点，也就是具体商品
-  vector<string>v2;
-  getAllNode(root->child,v1);
-  getAllChildType(root->child,v2);
+  vector<Node*>v2;
+  getAllNode(root->child,v2);
+  getAllChildType(root->child,v1);
   if(v1.size() == 0){
       cout<<"当前目录没有子分类"<<endl;
       return ;
   }
   cout<<"当前目录下有以下子分类:"<<endl;
-  for(int i = 0 ; i < v2.size() ; i ++){
-    cout<<v2[i]<<endl;
+  for(int i = 0 ; i < v1.size() ; i ++){
+    cout<<v1[i]<<endl;
   }
   cout<<endl;
   cout<<"当前目录下的所有商品有:"<<endl;
-  for(int i = 0 ;i < v1.size() ; i ++){
-      cout<<v1[i]<<endl;
+  for(int i = 0 ;i < v2.size() ; i ++){
+      cout<<"商品名称:"<<v2[i] -> name<<endl;
+      cout<<"商品价格:"<<v2[i] -> price<<endl;
+      cout<<"保质期:"<<v2[i] -> date<<endl;
+     if(v2[i] -> isinport == 0)cout<<"非进口"<<endl<<endl;
+     else cout<<"进口"<<endl<<endl;
   }
   cout<<endl;
 }
@@ -238,7 +269,7 @@ void findGoodLessN(Node * root,vector<string>&v){
 void findInportGood(Node * root,vector<string>&v){
     if(root == NULL)return;
     while(root){
-        if(root->child == NULL && root ->date < 90)v.push_back(root ->name);
+        if(root->child == NULL && root ->date < 90 && root ->isleaf == 1)v.push_back(root ->name);
         findInportGood(root->child,v);
         root = root ->brother;
     }
@@ -260,7 +291,9 @@ int main(){
     cout<<"8-当前目录下所有商品打折"<<endl;
     cout<<"9-查询保质期少于90天的商品"<<endl;
     cout<<"10-查询所有进口商品"<<endl;
-    cout<<"11-退出"<<endl;
+    cout<<"11-修改某个商品"<<endl;
+    cout<<"12-写入文件"<<endl;
+    cout<<"13-退出"<<endl;
     cout<<"输入选择:";
     cin>>choice;
     cout<<endl;
@@ -323,6 +356,23 @@ int main(){
             for(int i = 0 ;i < v.size() ; i ++){
                cout<<v[i]<<endl;
              }
+        }
+    }else if(choice == 11){
+        cout<<"输入商品名称:";
+        string s;
+        cin>>s;
+        Node *k = findNode(head,s);
+        if(k == NULL){
+            cout<<"没有这个商品"<<endl;
+        }else {
+           cout<<"修改商品名称:"<<endl;
+           cin>>k -> name;
+           cout<<"修改商品价格:"<<endl;
+           cin>>k -> price;
+           cout<<"修改商品保质期:"<<endl;
+           cin>>k -> date;
+           cout<<"修改商品进口信息 0-非进口 1-进口:"<<endl;
+           cin>>k -> isinport;
         }
     }
   }

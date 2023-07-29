@@ -10,8 +10,8 @@ using namespace std;
 #include<set>
 #include<cmath>
 #include<queue>
-
-
+ 
+ 
 void solve() {
   int n;
   cin>>n;
@@ -44,11 +44,11 @@ void solve() {
             p.push_back({i,ide1});
             p.push_back({i,i - 1});
         }
-        if(ide1 > 0 && v[ide1] < v[ide1 - 1]){
+     }
+      if(ide1 > 0 && v[ide1] < v[ide1 - 1]){
            v[ide1] += v[ide1 - 1];
            p.push_back({ide1,ide1 - 1});
         }
-     }
      for(int i = ide1 + 1 ; i < n ; i ++){
          while(v[i] < v[i - 1]){
             v[i] += v[ide1];
@@ -69,11 +69,11 @@ void solve() {
              p.push_back({i,ide2});
              p.push_back({i,i + 1});
          }
-         if(ide2 < n - 1 && v[ide2] > v[ide2 + 1]){
-            v[ide2] =+ v[ide2 + 1];
-            p.push_back({ide2,ide2 + 1});
-         }
      }
+     if(ide2 < n - 1 && v[ide2] > v[ide2 + 1]){
+          v[ide2] =+ v[ide2 + 1];
+          p.push_back({ide2,ide2 + 1});
+       }
      for(int i = ide2 - 1 ; i  >= 0 ; i  --){
          while(v[i] > v[i + 1]){
              v[i] += v[ide2];
@@ -88,8 +88,8 @@ void solve() {
     cout<<p[i].first + 1<<" "<<p[i].second + 1<<endl;
   }
 }
-
-
+ 
+ 
 int main(){
   int t = 1;
   cin>>t;
